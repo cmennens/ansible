@@ -1,0 +1,9 @@
+---
+- hosts: oracle
+  become: yes
+  tasks:
+    - name: Update and upgrade dnf packages
+      dnf:
+        name: '*'
+        state: latest
+...
