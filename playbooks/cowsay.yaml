@@ -1,3 +1,4 @@
+# ansible-galaxy install jsecchiero.cowsay --force
 ---
 - hosts: localhost
   roles:
