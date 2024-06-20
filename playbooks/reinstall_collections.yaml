@@ -1,15 +1,111 @@
 ---
-- hosts: localhost
+- name: Update or reinstall Ansible Galaxy modules
+  hosts: localhost
   gather_facts: no
   tasks:
-    - name: Get list of installed collections
-      command: ansible-galaxy collection list
-      register: collections_output
-
-    - name: Parse collections output
-      set_fact:
-        collections: "{{ collections_output.stdout_lines[2:] | map('regex_replace', '^(\\S+)\\s+(\\S+)\\s+.*$', '\\1.\\2') | list }}"
-
-    - name: Reinstall all collections
-      command: ansible-galaxy collection install -f "{{ item }}"
-      loop: "{{ collections }}"
+    - name: Ensure required Ansible Galaxy modules are installed
+      ansible.builtin.command:
+        cmd: "ansible-galaxy collection install {{ item }} --force"
+      loop:
+        - amazon.aws
+        - ansible.netcommon
+        - ansible.posix
+        - ansible.utils
+        - ansible.windows
+        - arista.eos
+        - awx.awx
+        - azure.azcollection
+        - check_point.mgmt
+        - chocolatey.chocolatey
+        - cisco.aci
+        - cisco.asa
+        - cisco.dnac
+        - cisco.intersight
+        - cisco.ios
+        - cisco.iosxr
+        - cisco.ise
+        - cisco.meraki
+        - cisco.mso
+        - cisco.nxos
+        - cisco.ucs
+        - cloud.common
+        - cloudscale_ch.cloud
+        - community.aws
+        - community.azure
+        - community.ciscosmb
+        - community.crypto
+        - community.digitalocean
+        - community.dns
+        - community.docker
+        - community.general
+        - community.grafana
+        - community.hashi_vault
+        - community.hrobot
+        - community.library_inventory_filtering_v1
+        - community.libvirt
+        - community.mongodb
+        - community.mysql
+        - community.network
+        - community.okd
+        - community.postgresql
+        - community.proxysql
+        - community.rabbitmq
+        - community.routeros
+        - community.sap
+        - community.sap_libs
+        - community.sops
+        - community.vmware
+        - community.windows
+        - community.zabbix
+        - containers.podman
+        - cyberark.conjur
+        - cyberark.pas
+        - dellemc.enterprise_sonic
+        - dellemc.openmanage
+        - dellemc.powerflex
+        - dellemc.unity
+        - f5networks.f5_modules
+        - fortinet.fortimanager
+        - fortinet.fortios
+        - frr.frr
+        - gluster.gluster
+        - google.cloud
+        - grafana.grafana
+        - hetzner.hcloud
+        - hpe.nimble
+        - ibm.qradar
+        - ibm.spectrum_virtualize
+        - ibm.storage_virtualize
+        - infinidat.infinibox
+        - infoblox.nios_modules
+        - inspur.ispim
+        - inspur.sm
+        - junipernetworks.junos
+        - kubernetes.core
+        - lowlydba.sqlserver
+        - microsoft.ad
+        - netapp.aws
+        - netapp.azure
+        - netapp.cloudmanager
+        - netapp.elementsw
+        - netapp.ontap
+        - netapp.storagegrid
+        - netapp.um_info
+        - netapp_eseries.santricity
+        - netbox.netbox
+        - ngine_io.cloudstack
+        - ngine_io.exoscale
+        - openstack.cloud
+        - openvswitch.openvswitch
+        - ovirt.ovirt
+        - purestorage.flasharray
+        - purestorage.flashblade
+        - purestorage.fusion
+        - sensu.sensu_go
+        - splunk.es
+        - t_systems_mms.icinga_director
+        - telekom_mms.icinga_director
+        - theforeman.foreman
+        - vmware.vmware_rest
+        - vultr.cloud
+        - vyos.vyos
