@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  roles:
+    - role: jsecchiero.cowsay
+      vars:
+        cowsay_say: "Shiiiiiiiiiiiittt"
