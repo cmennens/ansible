@@ -1,0 +1,26 @@
+---
+- name: Reinstall all installed Ansible Galaxy collections
+  hosts: localhost
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: List installed Ansible Galaxy collections
+      shell: ansible-galaxy collection list
+      register: collection_list
+
+    - name: Save installed collections to a file
+      copy:
+        content: "{{ collection_list.stdout }}"
+        dest: /tmp/installed_collections.txt
+
+    - name: Extract collection names
+      shell: grep "==" /tmp/installed_collections.txt | awk '{print $1}' > /tmp/collection_names.txt
+
+    - name: Read collection names
+      command: cat /tmp/collection_names.txt
+      register: collection_names
+
+    - name: Reinstall each collection
+      shell: ansible-galaxy collection install {{ item }} --force
+      loop: "{{ collection_names.stdout_lines }}"
