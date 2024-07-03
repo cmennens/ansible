@@ -1,0 +1,14 @@
+---
+- name: Display public IP address
+  hosts: localhost
+  tasks:
+    - name: Get public IP
+      uri:
+        url: http://ifconfig.me/ip
+        return_content: yes
+      register: ip_result
+
+    - name: Display public IP
+      debug:
+        msg: "Your public IP is {{ ip_result.content | trim }}"
+...
