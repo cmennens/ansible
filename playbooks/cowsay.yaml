@@ -1,7 +1,0 @@
-# ansible-galaxy install jsecchiero.cowsay --force
----
-- hosts: localhost
-  roles:
-    - role: jsecchiero.cowsay
-      vars:
-        cowsay_say: "Shiiiiiiiiiiiittt"
