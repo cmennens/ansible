@@ -1,6 +1,8 @@
 ---
 - name: Output Ansible version
   hosts: localhost
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   gather_facts: false
   tasks:
     - name: Get Ansible version
@@ -9,4 +11,5 @@
 
     - name: Print Ansible version
       debug:
-        msg: "{{ ansible_version_output.stdout }}"
+        msg: "{{ ansible_version_output.stdout_lines[0] }}"
+...
