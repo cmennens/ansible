@@ -1,0 +1,37 @@
+---
+- name: Install Geekbench on Debian
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Ensure apt cache is up to date
+      apt:
+        update_cache: true
+
+    - name: Install necessary dependencies
+      apt:
+        name: 
+          - wget
+          - gdebi-core
+        state: present
+
+    - name: Download Geekbench
+      command: wget -qO- https://cdn.geekbench.com/Geekbench-5.4.4-Linux.tar.gz | tar xz -C /tmp
+
+    - name: Install Geekbench
+      command: dpkg -i /tmp/Geekbench-5.4.4-Linux/Geekbench-5.4.4-Linux.deb
+
+    - name: Cleanup temporary files
+      file:
+        path: /tmp/Geekbench-5.4.4-Linux
+        state: absent
+        force: true
+
+    - name: Verify Geekbench installation
+      command: geekbench5 --version
+      register: result
+
+    - name: Display Geekbench version
+      debug:
+        msg: "Geekbench version installed: {{ result.stdout }}"
+...
