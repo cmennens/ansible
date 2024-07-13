@@ -1,13 +1,13 @@
 ---
 - name: Upgrade Packages on localhost
   hosts: localhost
-  become: yes
+  become: true
   connection: local
 
   tasks:
     - name: Update apt cache
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 3600
 
     - name: Upgrade all packages to the latest version
