@@ -1,0 +1,14 @@
+---
+- name: Display the uptime of the localhost
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get system uptime ʕノ•ᴥ•ʔノ ︵ ┻━┻
+      ansible.builtin.command:
+        cmd: uptime
+      register: uptime_output
+
+    - name: Display system uptime
+      ansible.builtin.debug:
+        msg: "{{ uptime_output.stdout }}"
+...
