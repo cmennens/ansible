@@ -1,0 +1,14 @@
+---
+- name: Display the uptime of the Docker container running Ansible
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Gather information about Semaphore UI
+      community.general.docker_container_info:
+        name: semaphore_ui
+      register: container_info
+
+    - name: Display the uptime of the container
+      ansible.builtin.debug:
+        msg: "Uptime of 'semaphore_ui' container: {{ (ansible_date_time.epoch | int - (container_info.containers[0].State.StartedAt | regex_replace('T|Z', ' ') | to_datetime('%Y-%m-%d %H:%M:%S.%f') | int)) | human_time(delta=True) }}"
+...
