@@ -1,0 +1,105 @@
+---
+- name: Join Linux server domain
+  hosts: linux
+  become: true
+
+  vars_files:
+    - /etc/ansible/vault/ad_pw.yaml # Password for svcjoinad
+    - /etc/ansible/vault/ad_domain.yaml # Domain name
+
+  tasks:
+    - name: Install required packages
+      dnf:
+        name:
+          - adcli
+          - epel-release
+          - krb5-workstation
+          - net-snmp
+          - nscd.x86_64
+          - oddjob
+          - oddjob-mkhomedir
+          - openldap-clients
+          - perl
+          - perl-LDAP
+          - policycoreutils-python-utils
+          - postfix
+          - realmd
+          - samba-common
+          - samba-common-tools
+          - sssd
+          - xorg-x11-xauth
+          - xterm
+        state: present
+
+    - name: Run ktutil commands to create krb5.keytab file
+      shell: |
+        ktutil <<EOF
+        addent -password -p svcjoinad -k 1 -e aes256-cts-hmac-sha1-96
+        {{ ad_pw }}
+        wkt /etc/krb5.keytab
+        q
+        EOF
+      become: true
+      environment:
+        KRB5_TRACE: /tmp/krb5_trace.log
+      args:
+        creates: /etc/krb5.keytab
+
+    - name: Display Kerberos trace log for debugging
+      command: cat /tmp/krb5_trace.log
+      register: krb5_trace_output
+      failed_when: false
+      ignore_errors: true
+
+    - name: Debug Kerberos trace log
+      debug:
+        var: krb5_trace_output.stdout_lines
+
+    - name: Copy krb5.conf
+      copy:
+        src: /etc/ansible/bin/templates/krb5.conf
+        dest: /etc/krb5.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Rename the server
+      command: hostnamectl set-hostname {{ new_hostname }}
+      notify:
+        - Restart systemd-hostnamed
+
+    - name: Run strace with kinit using expect
+      expect:
+        command: "strace -P /tmp/krb5cc_0 kinit svcjoinad"
+        responses:
+          Password: "{{ ad_pw }}"
+
+    - name: Check if the server is already joined to the domain
+      command: realm list
+      register: realm_list_result
+      changed_when: false
+
+    - name: Join the domain
+      command: timeout 60 realm join -U svcjoinad "{{ ad_domain }}"
+      register: join_result
+      ignore_errors: true
+      when: " {{ ad_domain }} not in realm_list_result.stdout"
+
+    - name: Restart SSSD service
+      service:
+        name: sssd
+        state: restarted
+        enabled: true
+
+    - name: Restart SSH service
+      service:
+        name: sshd
+        state: restarted
+        enabled: true
+
+  handlers:
+    - name: Restart systemd-hostnamed
+      service:
+        name: systemd-hostnamed
+        state: restarted
+...
