@@ -1,0 +1,38 @@
+---
+- name: Deploy Docker Container
+  hosts: localhost
+  vars_prompt:
+    - name: container_name
+      prompt: "Enter the container name"
+      private: false
+
+  tasks:
+    - name: Set hostname to be the same as container name
+      set_fact:
+        hostname: "{{ container_name }}"
+
+    - name: Create a Docker volume
+      docker_volume:
+        name: "{{ container_name }}_volume"
+        state: present
+
+    - name: Create a Docker network
+      docker_network:
+        name: "{{ container_name }}_vnet"
+        state: present
+
+    - name: Deploy the Docker container
+      docker_container:
+        name: "{{ container_name }}"
+        hostname: "{{ hostname }}"
+        image: debian:latest
+        volumes:
+          - "{{ container_name }}_volume:/data"
+        networks:
+          - name: "{{ container_name }}_vnet"
+        state: started
+
+    - name: Ensure the container is deployed on Docker localhost
+      debug:
+        msg: "Container {{ container_name }} is deployed on Docker localhost with hostname {{ hostname }}."
+...
