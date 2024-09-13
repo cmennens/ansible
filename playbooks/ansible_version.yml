@@ -9,8 +9,26 @@
       command: ansible --version
       register: ansible_version_output
 
-    - name: Print Ansible version details
+    - name: Parse Ansible version details
+      set_fact:
+        ansible_version_details: |
+          {%- set details = {} -%}
+          {%- for line in ansible_version_output.stdout_lines[1:] %}
+            {%- set key_value = line.strip().split('=', 1) %}
+            {%- if key_value | length == 2 %}
+              {%- set _ = details.update({ key_value[0].strip(): key_value[1].strip() }) %}
+            {%- else %}
+              {%- set _ = details.update({ 'ansible_version': key_value[0].strip() }) %}
+            {%- endif %}
+          {%- endfor %}
+          {{ details }}
+
+    - name: Print Ansible version details in table format
       debug:
-        msg: "{{ item }}"
-      loop: "{{ ansible_version_output.stdout_lines }}"
+        msg: |
+          | Key                                | Value                                                                 |
+          |------------------------------------|-----------------------------------------------------------------------|
+          {% for key, value in ansible_version_details.items() %}
+          | {{ key.ljust(34) }} | {{ value }} |
+          {% endfor %}
 ...
