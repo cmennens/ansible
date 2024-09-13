@@ -9,7 +9,8 @@
       command: ansible --version
       register: ansible_version_output
 
-    - name: Print Ansible version
+    - name: Print Ansible version details
       debug:
-        msg: "{{ ansible_version_output.stdout_lines[0] }}"
+        msg: "{{ item }}"
+      loop: "{{ ansible_version_output.stdout_lines }}"
 ...
