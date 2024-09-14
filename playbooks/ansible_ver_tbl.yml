@@ -1,5 +1,5 @@
 ---
-- name: Output Ansible version in SQL format
+- name: Output Ansible version in table format
   hosts: localhost
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -9,28 +9,22 @@
       command: ansible --version
       register: ansible_version_output
 
-    - name: Create SQL table format output
+    - name: Create table format output
       set_fact:
-        sql_output: |
-          CREATE TABLE ansible_version_details (
-              id INTEGER PRIMARY KEY,
-              description TEXT,
-              value TEXT
-          );
-
-          {% set id_counter = 1 %}
+        table_output: |
+          +----------------------------------+-----------------------------------------------------------------------+
+          | Description                      | Value                                                                 |
+          +----------------------------------+-----------------------------------------------------------------------+
           {% for line in ansible_version_output.stdout_lines %}
           {% if '=' in line %}
-          INSERT INTO ansible_version_details (id, description, value) VALUES
-          ({{ id_counter }}, '{{ line.split('=')[0].strip() }}', '{{ line.split('=')[1].strip() }}');
+          | {{ line.split('=')[0].strip() | replace('  ', '') | ljust(32) }} | {{ line.split('=')[1].strip() | replace('  ', '') | ljust(63) }} |
           {% else %}
-          INSERT INTO ansible_version_details (id, description, value) VALUES
-          ({{ id_counter }}, '{{ line.split(maxsplit=1)[0].strip() }}', '{{ line.split(maxsplit=1)[1].strip() }}');
+          | {{ line.split(maxsplit=1)[0].strip() | replace('  ', '') | ljust(32) }} | {{ line.split(maxsplit=1)[1].strip() | replace('  ', '') | ljust(63) }} |
           {% endif %}
-          {% set id_counter = id_counter + 1 %}
+          +----------------------------------+-----------------------------------------------------------------------+
           {% endfor %}
 
-    - name: Display SQL table format output
+    - name: Display table format output
       debug:
-        msg: "{{ sql_output }}"
+        msg: "{{ table_output }}"
 ...
