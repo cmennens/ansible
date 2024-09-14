@@ -1,43 +1,27 @@
 ---
-- name: Deploy Docker Container
-  hosts: localhost
-  vars_prompt:
-    - name: container_name
-      prompt: "Enter the container name"
-      private: false
-
+- name: Deploy Docker container with static IP
+  hosts: all
+  become: true
   tasks:
 
-    - name: Set Python interpreter
-      set_fact:
-        ansible_python_interpreter: /usr/bin/python3
-        
-    - name: Set hostname to be the same as container name
-      set_fact:
-        hostname: "{{ container_name }}"
-
-    - name: Create a Docker volume
-      docker_volume:
-        name: "{{ container_name }}_volume"
-        state: present
-
-    - name: Create a Docker network
+    - name: Create a custom Docker network
       docker_network:
-        name: "{{ container_name }}_vnet"
-        state: present
+        name: custom_host_network
+        driver: bridge
+        ipam_options:
+          subnet: "192.168.1.0/24"
+          gateway: "192.168.1.1"
 
-    - name: Deploy the Docker container
+    - name: Deploy a Docker container with static IP
       docker_container:
-        name: "{{ container_name }}"
-        hostname: "{{ hostname }}"
+        name: tmp-01
         image: debian:latest
-        volumes:
-          - "{{ container_name }}_volume:/data"
+        hostname: tmp-01
         networks:
-          - name: "{{ container_name }}_vnet"
+          - name: custom_host_network
+            ipv4_address: "192.168.1.160"
         state: started
+        restart_policy: always
+        detach: true
 
-    - name: Ensure the container is deployed on Docker localhost
-      debug:
-        msg: "Container {{ container_name }} is deployed on Docker localhost with hostname {{ hostname }}."
 ...
