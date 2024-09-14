@@ -17,9 +17,9 @@
           +----------------------------------+-----------------------------------------------------------------------+
           {% for line in ansible_version_output.stdout_lines %}
           {% if '=' in line %}
-          | {{ line.split('=')[0].strip() | replace('  ', '') | ljust(32) }} | {{ line.split('=')[1].strip() | replace('  ', '') | ljust(63) }} |
+          | {{ '{:<32}'.format(line.split('=')[0].strip()) }} | {{ '{:<63}'.format(line.split('=')[1].strip()) }} |
           {% else %}
-          | {{ line.split(maxsplit=1)[0].strip() | replace('  ', '') | ljust(32) }} | {{ line.split(maxsplit=1)[1].strip() | replace('  ', '') | ljust(63) }} |
+          | {{ '{:<32}'.format(line.split(maxsplit=1)[0].strip()) }} | {{ '{:<63}'.format(line.split(maxsplit=1)[1].strip()) }} |
           {% endif %}
           +----------------------------------+-----------------------------------------------------------------------+
           {% endfor %}
