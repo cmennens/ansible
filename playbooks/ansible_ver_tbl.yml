@@ -5,7 +5,7 @@
     ansible_python_interpreter: /usr/bin/python3
   gather_facts: false
   tasks:
-    - name: Ansible version
+    - name: Get Ansible version details
       command: ansible --version
       register: ansible_version_output
 
@@ -18,9 +18,16 @@
               value TEXT
           );
 
+          {% set id_counter = 1 %}
           {% for line in ansible_version_output.stdout_lines %}
+          {% if '=' in line %}
           INSERT INTO ansible_version_details (id, description, value) VALUES
-          ({{ loop.index }}, '{{ line.split('=')[0].strip() if '=' in line else line.split()[0] }}', '{{ line.split('=')[1].strip() if '=' in line else line.split(maxsplit=1)[1] }}');
+          ({{ id_counter }}, '{{ line.split('=')[0].strip() }}', '{{ line.split('=')[1].strip() }}');
+          {% else %}
+          INSERT INTO ansible_version_details (id, description, value) VALUES
+          ({{ id_counter }}, '{{ line.split(maxsplit=1)[0].strip() }}', '{{ line.split(maxsplit=1)[1].strip() }}');
+          {% endif %}
+          {% set id_counter = id_counter + 1 %}
           {% endfor %}
 
     - name: Display SQL table format output
