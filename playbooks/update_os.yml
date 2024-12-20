@@ -4,41 +4,40 @@
   become: yes
   gather_facts: yes
   tasks:
-    - name: Perform apt update and upgrade for Debian-based systems
-      ansible.builtin.block:
+    - name: Perform APT operations for Debian-based systems
+      block:
         - name: Update APT cache
           ansible.builtin.apt:
             update_cache: yes
 
-        - name: Perform APT upgrade and display changes
+        - name: Upgrade APT packages
           ansible.builtin.shell:
             cmd: apt-get -y upgrade
             warn: false
           register: apt_upgrade_result
-          changed_when: "'upgraded' in apt_upgrade_result.stdout"
       when: ansible_facts['os_family'] == 'Debian'
 
-    - name: Display updated/upgraded packages for Debian-based systems
+    - name: Display upgraded packages for Debian
       debug:
         var: apt_upgrade_result.stdout_lines
       when: ansible_facts['os_family'] == 'Debian'
 
-    - name: Perform pacman update and upgrade for Arch-based systems
-      ansible.builtin.block:
-        - name: Update pacman package database
+    - name: Perform pacman operations for Arch-based systems
+      block:
+        - name: Update pacman database
           ansible.builtin.shell:
             cmd: pacman -Syy
             warn: false
           register: pacman_update_result
 
-        - name: Perform system upgrade with pacman and display changes
+        - name: Upgrade pacman packages
           ansible.builtin.shell:
             cmd: pacman -Syu --noconfirm
             warn: false
           register: pacman_upgrade_result
       when: ansible_facts['distribution'] == 'Arch'
 
-    - name: Display updated/upgraded packages for Arch-based systems
+    - name: Display upgraded packages for Arch
       debug:
         var: pacman_upgrade_result.stdout_lines
       when: ansible_facts['distribution'] == 'Arch'
