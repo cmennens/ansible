@@ -1,0 +1,29 @@
+---
+- name: Update and upgrade packages based on OS
+  hosts: home-lab
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Perform apt update and upgrade for Debian-based systems
+      ansible.builtin.block:
+        - name: Update APT cache
+          ansible.builtin.apt:
+            update_cache: yes
+
+        - name: Perform APT upgrade
+          ansible.builtin.apt:
+            upgrade: dist
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Perform pacman update and upgrade for Arch-based systems
+      ansible.builtin.block:
+        - name: Update pacman package database
+          ansible.builtin.command:
+            cmd: pacman -Syy
+            creates: /var/lib/pacman/sync
+
+        - name: Perform system upgrade with pacman
+          ansible.builtin.command:
+            cmd: pacman -Syu --noconfirm
+      when: ansible_facts['distribution'] == 'Arch'
+...
