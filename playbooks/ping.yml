@@ -1,5 +1,5 @@
 ---
-- name: ping
+- name: ping ( •_•)O*¯`·.¸.·´¯`°Q(•_• )
   hosts: 'homelab'
   gather_facts: false
   tasks:
