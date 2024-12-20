@@ -1,6 +1,6 @@
 ---
 - name: ping
-  hosts: 'home-lab'
+  hosts: 'homelab'
   gather_facts: false
   tasks:
     - name: ping
