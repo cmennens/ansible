@@ -1,6 +1,7 @@
 ---
-- name: Ping ( •_•)O*¯`·.¸.·´¯`°Q(•_• )
+- name: ping
   hosts: 'home-lab'
+  gather_facts: false
   tasks:
     - name: ping
       ansible.builtin.ping:
