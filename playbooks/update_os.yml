@@ -13,8 +13,8 @@
         - name: Upgrade APT packages
           ansible.builtin.shell:
             cmd: apt-get -y upgrade
-            warn: false
           register: apt_upgrade_result
+          changed_when: "'upgraded' in apt_upgrade_result.stdout"
       when: ansible_facts['os_family'] == 'Debian'
 
     - name: Display upgraded packages for Debian
@@ -27,13 +27,11 @@
         - name: Update pacman database
           ansible.builtin.shell:
             cmd: pacman -Syy
-            warn: false
           register: pacman_update_result
 
         - name: Upgrade pacman packages
           ansible.builtin.shell:
             cmd: pacman -Syu --noconfirm
-            warn: false
           register: pacman_upgrade_result
       when: ansible_facts['distribution'] == 'Arch'
 
