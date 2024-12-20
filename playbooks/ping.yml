@@ -1,6 +1,6 @@
 ---
 - name: Ping ( •_•)O*¯`·.¸.·´¯`°Q(•_• )
-  hosts: home-lab
+  hosts: 'home-lab'
   tasks:
     - name: ping
       ansible.builtin.ping:
