@@ -10,20 +10,36 @@
           ansible.builtin.apt:
             update_cache: yes
 
-        - name: Perform APT upgrade
-          ansible.builtin.apt:
-            upgrade: dist
+        - name: Perform APT upgrade and display changes
+          ansible.builtin.shell:
+            cmd: apt-get -y upgrade
+            warn: false
+          register: apt_upgrade_result
+          changed_when: "'upgraded' in apt_upgrade_result.stdout"
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Display updated/upgraded packages for Debian-based systems
+      debug:
+        var: apt_upgrade_result.stdout_lines
       when: ansible_facts['os_family'] == 'Debian'
 
     - name: Perform pacman update and upgrade for Arch-based systems
       ansible.builtin.block:
         - name: Update pacman package database
-          ansible.builtin.command:
+          ansible.builtin.shell:
             cmd: pacman -Syy
-            creates: /var/lib/pacman/sync
+            warn: false
+          register: pacman_update_result
 
-        - name: Perform system upgrade with pacman
-          ansible.builtin.command:
+        - name: Perform system upgrade with pacman and display changes
+          ansible.builtin.shell:
             cmd: pacman -Syu --noconfirm
+            warn: false
+          register: pacman_upgrade_result
+      when: ansible_facts['distribution'] == 'Arch'
+
+    - name: Display updated/upgraded packages for Arch-based systems
+      debug:
+        var: pacman_upgrade_result.stdout_lines
       when: ansible_facts['distribution'] == 'Arch'
 ...
