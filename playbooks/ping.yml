@@ -3,6 +3,11 @@
   hosts: 'homelab'
   gather_facts: false
   tasks:
-    - name: ping
+    - name: Ping Linux hosts
       ansible.builtin.ping:
+      when: ansible_connection == "ssh"
+
+    - name: Ping Windows hosts
+      ansible.windows.win_ping:
+      when: ansible_connection == "winrm"
 ...
