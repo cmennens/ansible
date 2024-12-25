@@ -1,20 +1,26 @@
 ---
 - name: Output Ansible version in table format
   hosts: localhost
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   gather_facts: false
   tasks:
     - name: Get Ansible version details
       command: ansible --version
       register: ansible_version_output
 
-    - name: Parse version details into a table format
+    - name: Create table format output
       set_fact:
         table_output: |
           +----------------------------------+-----------------------------------------------------------------------+
           | Description                      | Value                                                                 |
           +----------------------------------+-----------------------------------------------------------------------+
           {% for line in ansible_version_output.stdout_lines %}
-          | {{ line.split(":")[0]|default("").strip()|truncate(32, True, '…') }} | {{ line.split(":")[1]|default("").strip()|truncate(63, True, '…') }} |
+          {% if '=' in line %}
+          | {{ '{:<32}'.format(line.split('=')[0].strip()) }} | {{ '{:<63}'.format(line.split('=')[1].strip()) }} |
+          {% else %}
+          | {{ '{:<32}'.format(line.split(maxsplit=1)[0].strip()) }} | {{ '{:<63}'.format(line.split(maxsplit=1)[1].strip()) }} |
+          {% endif %}
           +----------------------------------+-----------------------------------------------------------------------+
           {% endfor %}
 
