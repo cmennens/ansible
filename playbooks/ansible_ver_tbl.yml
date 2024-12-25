@@ -7,18 +7,29 @@
       command: ansible --version
       register: ansible_version_output
 
+    - name: Parse version details
+      set_fact:
+        parsed_lines: >
+          {%- set result = [] -%}
+          {%- for line in ansible_version_output.stdout_lines %}
+            {%- if '=' in line %}
+              {%- set parts = line.split('=', 1) -%}
+              {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
+            {%- else %}
+              {%- set parts = line.split(maxsplit=1) -%}
+              {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
+            {%- endif %}
+          {%- endfor -%}
+          {{ result }}
+
     - name: Create table format output
       set_fact:
-        table_output: |
+        table_output: >
           +----------------------------------+-----------------------------------------------------------------------+
           | Description                      | Value                                                                 |
           +----------------------------------+-----------------------------------------------------------------------+
-          {% for line in ansible_version_output.stdout_lines %}
-          {% if '=' in line %}
-          | {{ '{:<32}'.format(line.split('=')[0].strip()) }} | {{ '{:<63}'.format(line.split('=')[1].strip()) }} |
-          {% else %}
-          | {{ '{:<32}'.format(line.split(maxsplit=1)[0].strip()) }} | {{ '{:<63}'.format(line.split(maxsplit=1)[1].strip()) }} |
-          {% endif %}
+          {% for item in parsed_lines %}
+          | {{ '{:<32}'.format(item.desc) }} | {{ '{:<63}'.format(item.value) }} |
           +----------------------------------+-----------------------------------------------------------------------+
           {% endfor %}
 
