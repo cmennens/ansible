@@ -7,41 +7,16 @@
       command: ansible --version
       register: ansible_version_output
 
-    - name: Parse version details
+    - name: Parse version details into a table format
       set_fact:
-        parsed_lines: >
-          {%- set result = [] -%}
-          {%- for line in ansible_version_output.stdout_lines %}
-            {%- if '=' in line %}
-              {%- set parts = line.split('=', 1) -%}
-              {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
-            {%- elif line.strip() != '' %}
-              {%- set parts = line.split(maxsplit=1) -%}
-              {%- if parts|length == 2 -%}
-                {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
-              {%- else -%}
-                {%- set result = result + [{'desc': line.strip(), 'value': ''}] -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {{ result }}
-
-    - name: Generate table rows
-      set_fact:
-        table_rows: >
-          {%- set output = [] -%}
+        table_output: |
           +----------------------------------+-----------------------------------------------------------------------+
           | Description                      | Value                                                                 |
           +----------------------------------+-----------------------------------------------------------------------+
-          {%- for item in parsed_lines %}
-          {{ output.append("| {:<32} | {:<63} |".format(item.desc, item.value)) }}
-          {{ output.append("+----------------------------------+-----------------------------------------------------------------------+") }}
-          {%- endfor -%}
-          {{ output }}
-
-    - name: Create table output as a string
-      set_fact:
-        table_output: "{{ table_rows | join('\n') }}"
+          {% for line in ansible_version_output.stdout_lines %}
+          | {{ line.split(":")[0]|default("").strip()|truncate(32, True, '…') }} | {{ line.split(":")[1]|default("").strip()|truncate(63, True, '…') }} |
+          +----------------------------------+-----------------------------------------------------------------------+
+          {% endfor %}
 
     - name: Display table format output
       debug:
