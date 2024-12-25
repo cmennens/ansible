@@ -1,6 +1,8 @@
 ---
 - name: Display public IP address
   hosts: localhost
+  vars:
+    ansible_connection: local
   tasks:
     - name: Get public IP
       uri:
