@@ -1,8 +1,6 @@
 ---
 - name: Output Ansible version in table format
   hosts: localhost
-  vars:
-    ansible_python_interpreter: /usr/bin/python3
   gather_facts: false
   tasks:
     - name: Get Ansible version details
