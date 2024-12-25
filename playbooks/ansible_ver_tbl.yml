@@ -17,7 +17,9 @@
               {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
             {%- else %}
               {%- set parts = line.split(maxsplit=1) -%}
-              {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
+              {%- if parts|length == 2 -%}
+                {%- set result = result + [{'desc': parts[0].strip(), 'value': parts[1].strip()}] -%}
+              {%- endif -%}
             {%- endif %}
           {%- endfor -%}
           {{ result }}
@@ -35,5 +37,6 @@
 
     - name: Display table format output
       debug:
-        msg: "{{ table_output }}"
+        msg: |
+          {{ table_output }}
 ...
