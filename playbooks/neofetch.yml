@@ -1,0 +1,19 @@
+---
+- name: Run neofetch and display output
+  hosts: all
+  become: true
+  tasks:
+    - name: Install neofetch if missing
+      ansible.builtin.package:
+        name: neofetch
+        state: present
+
+    - name: Run neofetch
+      ansible.builtin.command:
+        cmd: neofetch --stdout
+      register: neofetch_output
+
+    - name: Display neofetch
+      ansible.builtin.debug:
+        var: neofetch_output.stdout
+...
