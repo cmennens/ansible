@@ -1,0 +1,40 @@
+---
+- name: PostgreSQL Backup
+  hosts: postgres
+  become: true
+  vars:
+    backup_dir: "/var/lib/postgresql/backups"
+    retention_days: 7
+    backup_time: "03:00"
+
+  tasks:
+    - name: Ensure PostgreSQL client is installed
+      package:
+        name: "{{ 'postgresql-client' if ansible_os_family == 'Debian' else 'postgresql' }}"
+        state: present
+
+    - name: Ensure backup directory exists
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: "0750"
+
+    - name: Create a cron job for full database backup
+      cron:
+        name: "PostgreSQL full database backup"
+        user: postgres
+        minute: "0"
+        hour: "{{ backup_time.split(':')[0] }}"
+        job: >
+          pg_dumpall -U postgres -F c > {{ backup_dir }}/all_databases_$(date +\%F).backup
+
+    - name: Create a cron job to remove old backups
+      cron:
+        name: "Remove old PostgreSQL backups"
+        user: postgres
+        minute: "0"
+        hour: "4"
+        job: "find {{ backup_dir }} -type f -name '*.backup' -mtime +{{ retention_days }} -delete"
+...
