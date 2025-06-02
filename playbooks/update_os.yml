@@ -1,42 +1,16 @@
 ---
-- name: Update and upgrade packages based on OS
-  hosts: homelab
-  become: yes
-  gather_facts: yes
+- name: Update Arch Linux system packages
+  hosts: all
+  become: true
   tasks:
-    - name: Perform APT operations for Debian-based systems
-      block:
-        - name: Update APT cache
-          ansible.builtin.apt:
-            update_cache: yes
 
-        - name: Upgrade APT packages
-          ansible.builtin.shell:
-            cmd: apt-get -y upgrade
-          register: apt_upgrade_result
-          changed_when: "'upgraded' in apt_upgrade_result.stdout"
-      when: ansible_facts['os_family'] == 'Debian'
+    - name: Force refresh the package database
+      ansible.builtin.command: pacman -Syy --noconfirm
+      register: refresh_output
+      changed_when: "'downloading' in refresh_output.stdout"
 
-    - name: Display upgraded packages for Debian
-      debug:
-        var: apt_upgrade_result.stdout_lines
-      when: ansible_facts['os_family'] == 'Debian'
-
-    - name: Perform pacman operations for Arch-based systems
-      block:
-        - name: Update pacman database
-          ansible.builtin.shell:
-            cmd: pacman -Syy
-          register: pacman_update_result
-
-        - name: Upgrade pacman packages
-          ansible.builtin.shell:
-            cmd: pacman -Syu --noconfirm
-          register: pacman_upgrade_result
-      when: ansible_facts['distribution'] == 'Arch'
-
-    - name: Display upgraded packages for Arch
-      debug:
-        var: pacman_upgrade_result.stdout_lines
-      when: ansible_facts['distribution'] == 'Arch'
+    - name: Upgrade all packages
+      ansible.builtin.command: pacman -Su --noconfirm
+      register: upgrade_output
+      changed_when: "'Packages' in upgrade_output.stdout"
 ...
