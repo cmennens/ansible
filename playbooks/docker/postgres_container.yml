@@ -1,7 +1,7 @@
 ---
 # postgres_container.yml
 - name: Deploy PostgreSQL Container
-  hosts: docker-host
+  hosts: localhost
   become: true
   vars:
     container_name: "{{ container_name }}"
