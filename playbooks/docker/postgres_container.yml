@@ -1,0 +1,25 @@
+---
+# postgres_container.yml
+- name: Deploy PostgreSQL Container
+  hosts: docker-host
+  become: true
+  vars:
+    container_name: "{{ container_name }}"
+    postgres_password: "{{ postgres_password | default('defaultpass') }}"
+  tasks:
+    - name: Pull latest PostgreSQL image
+      community.docker.docker_image:
+        name: postgres
+        source: pull
+        tag: latest
+
+    - name: Start PostgreSQL container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: postgres:latest
+        state: started
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+...
