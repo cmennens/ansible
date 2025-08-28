@@ -1,11 +1,14 @@
 ---
-# postgres_container.yml
-- name: Deploy PostgreSQL Container
+- name: Deploy PostgreSQL Container via Docker
   hosts: localhost
-  become: true
+  gather_facts: false
   vars:
+    ansible_python_interpreter: /usr/bin/python3
     container_name: "{{ container_name }}"
-    postgres_password: "{{ postgres_password | default('defaultpass') }}"
+    postgres_password: "{{ postgres_password | default('..Wide..Open') }}"
+    postgres_user: "{{ postgres_user | default('postgres') }}"
+    postgres_db: "{{ postgres_db | default('postgres') }}"
+    postgres_port: "{{ postgres_port | default(5432) }}"
   tasks:
     - name: Pull latest PostgreSQL image
       community.docker.docker_image:
@@ -13,13 +16,17 @@
         source: pull
         tag: latest
 
-    - name: Start PostgreSQL container
+    - name: Run PostgreSQL container
       community.docker.docker_container:
         name: "{{ container_name }}"
         image: postgres:latest
         state: started
+        restart_policy: no
         ports:
-          - "5432:5432"
+          - "{{ postgres_port }}:5432"
         env:
           POSTGRES_PASSWORD: "{{ postgres_password }}"
-...
+          POSTGRES_USER: "{{ postgres_user }}"
+          POSTGRES_DB: "{{ postgres_db }}"
+        volumes:
+          - "pg_data_{{ container_name }}:/var/lib/postgresql/data"
