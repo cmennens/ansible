@@ -1,0 +1,41 @@
+---
+- name: Fetch weather and log to PostgreSQL
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    latitude: "28° 40′ 11.99″ N"      # Replace with your actual latitude
+    longitude: "81° 13′ 6.00″ W"    # Replace with your actual longitude
+    weather_api_url: "https://api.open-meteo.com/v1/forecast?latitude={{ latitude }}&longitude={{ longitude }}&current_weather=true"
+    pg_host: "localhost"
+    pg_port: 5432
+    pg_db: "weather"
+    pg_user: "user_1"
+    pg_password: "your_password"
+    weather_table: "temps"
+
+  tasks:
+    - name: Fetch current weather data from Open-Meteo API
+      uri:
+        url: "{{ weather_api_url }}"
+        method: GET
+        return_content: yes
+        status_code: 200
+      register: weather_response
+
+    - name: Parse JSON response
+      set_fact:
+        temperature: "{{ weather_response.json.current_weather.temperature }}"
+        timestamp: "{{ weather_response.json.current_weather.time }}"
+
+    - name: Insert weather data into PostgreSQL
+      community.postgresql.postgresql_query:
+        db: "{{ pg_db }}"
+        login_user: "{{ pg_user }}"
+        login_password: "{{ pg_password }}"
+        login_host: "{{ pg_host }}"
+        login_port: "{{ pg_port }}"
+        query: >
+          INSERT INTO {{ weather_table }} (temperature, timestamp)
+          VALUES ({{ temperature }}, '{{ timestamp }}');
+...
